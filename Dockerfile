@@ -7,8 +7,8 @@ ARG PYTHON_ENV=python:3.8.11-slim-buster
 FROM $PYTHON_ENV_BUILDER as build
 
 RUN apt-get update && \
-    apt-get install -y ffmpeg libsm6 libxext6 make gcc \
-        ninja-build libglib2.0-0 libsm6 libxrender-dev libxext6
+    apt-get install -y ffmpeg libsm6 libxext6 libgl1 make gcc \
+        ninja-build libglib2.0-0 libxrender-dev libgl1-mesa-glx 
 
 WORKDIR /project
 COPY ./pyproject.toml ./poetry.lock /project
@@ -22,8 +22,9 @@ RUN python -m pip install --upgrade pip && \
 # development stage
 FROM $PYTHON_ENV as development
 
+COPY --from=build /usr/lib /usr/lib
 RUN apt-get update && \
-    apt-get install -y git
+    apt-get install -y git vim
 
 WORKDIR /project
 COPY ./pyproject.toml ./poetry.lock /project
@@ -41,6 +42,7 @@ RUN python -m pip install onnx==1.10.2 onnxruntime==1.8.0
 # production stage
 FROM $PYTHON_ENV as production
 
+COPY --from=build /usr/lib /usr/lib
 RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*

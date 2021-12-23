@@ -1,10 +1,10 @@
 import gradio as gr
+import requests
 import torch
 import torch.nn as nn
-from torchvision.transforms import functional as F
-from torchvision.models import resnet50
-import requests
 from PIL import Image
+from torchvision.models import resnet50
+from torchvision.transforms import functional as F
 
 
 def main():

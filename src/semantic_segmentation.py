@@ -1,9 +1,9 @@
 import gradio as gr
 import numpy as np
 import torch
-from torchvision.transforms import functional as F
-from torchvision.models.segmentation import deeplabv3_resnet50
 from PIL import Image
+from torchvision.models.segmentation import deeplabv3_resnet50
+from torchvision.transforms import functional as F
 
 
 def main():

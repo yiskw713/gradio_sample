@@ -1,7 +1,7 @@
 import gradio as gr
+import numpy as np
 from PIL import Image
 from torchvision import transforms
-import numpy as np
 
 
 def preprocess(img: np.ndarray, operation: str) -> np.ndarray:
@@ -22,7 +22,7 @@ def preprocess(img: np.ndarray, operation: str) -> np.ndarray:
         )
         img = random_affine(img)
     elif operation == "resize_crop":
-        resize_crop = transforms.RandomResizeCrop(
+        resize_crop = transforms.RandomResizedCrop(
             size=(224, 224),
             ratio=(3 / 4, 4 / 3),
         )
@@ -57,7 +57,7 @@ def main():
         description="drop image and choose pre-process",
     )
 
-    interface.launch(debug=True, share=False)
+    interface.launch(server_name="0.0.0.0")
 
 
 if __name__ == "__main__":

@@ -1,25 +1,23 @@
-import gradio as gr
-import torch
-import torch.nn as nn
-from torchvision.transforms import functional as F
-from torchvision.models import resnet50
-import requests
-from PIL import Image
-
-
 import argparse
 import os
 
 import cv2
+import gradio as gr
 import numpy as np
-
 import onnxruntime
+import requests
+import torch
+import torch.nn as nn
+from PIL import Image
+from torchvision.models import resnet50
+from torchvision.transforms import functional as F
 
+from yolox_utils import COCO_CLASSES, demo_postprocess, multiclass_nms
 from yolox_utils import preproc as preprocess
-from yolox_utils import COCO_CLASSES, multiclass_nms, demo_postprocess, vis
+from yolox_utils import vis
 
 
-if __name__ == "__main__":
+def main():
     MODEL = "./weights/yolox_s.onnx"
     SCORE_TH = 0.3
     INPUT_SHAPE = "640,640"
@@ -28,14 +26,13 @@ if __name__ == "__main__":
     input_shape = tuple(map(int, INPUT_SHAPE.split(",")))
     session = onnxruntime.InferenceSession(MODEL)
 
-    # TODO: opencv install
     def inference(gr_input):
         # RGB2BGR?
-        img, ratio = preprocess(origin_img, input_shape)
+        img, ratio = preprocess(gr_input, input_shape)
 
         ort_inputs = {session.get_inputs()[0].name: img[None, :, :, :]}
         output = session.run(None, ort_inputs)
-        predictions = demo_postprocess(output[0], input_shape, p6=args.with_p6)[0]
+        predictions = demo_postprocess(output[0], input_shape, p6=WITH_P6)[0]
 
         boxes = predictions[:, :4]
         scores = predictions[:, 4:5] * predictions[:, 5:]
@@ -53,8 +50,8 @@ if __name__ == "__main__":
                 dets[:, 4],
                 dets[:, 5],
             )
-            origin_img = vis(
-                origin_img,
+            gr_input = vis(
+                gr_input,
                 final_boxes,
                 final_scores,
                 final_cls_inds,
@@ -62,4 +59,13 @@ if __name__ == "__main__":
                 class_names=COCO_CLASSES,
             )
 
-        return np.asarray(original_img)
+        return np.asarray(gr_input)
+
+    inputs = gr.inputs.Image()
+    interface = gr.Interface(fn=inference, inputs=inputs, outputs="image")
+
+    interface.launch(server_name="0.0.0.0")
+
+
+if __name__ == "__main__":
+    main()

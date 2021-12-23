@@ -1,7 +1,7 @@
 # Reference: https://github.com/Megvii-BaseDetection/YOLOX
 # Copyright (c) Megvii, Inc. and its affiliates.
-import numpy as np
 import cv2
+import numpy as np
 
 
 def nms(boxes, scores, nms_thr):

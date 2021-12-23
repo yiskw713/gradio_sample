@@ -1,4 +1,7 @@
 *.onnx
 flagged
 .DS_Store
+__pycache__
+.venv
+.mypy_cache
 

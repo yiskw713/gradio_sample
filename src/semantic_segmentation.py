@@ -37,7 +37,6 @@ def main():
         mask = mask.convert("P")
         mask.putpalette(palette)
         mask = mask.convert("RGB")
-        mask.save("hoge.png")
 
         return np.asarray(mask)
 

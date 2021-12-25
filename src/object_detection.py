@@ -1,16 +1,7 @@
-import argparse
-import os
-
 import cv2
 import gradio as gr
 import numpy as np
 import onnxruntime
-import requests
-import torch
-import torch.nn as nn
-from PIL import Image
-from torchvision.models import resnet50
-from torchvision.transforms import functional as F
 
 from yolox_utils import COCO_CLASSES, demo_postprocess, multiclass_nms
 from yolox_utils import preproc as preprocess
@@ -19,15 +10,13 @@ from yolox_utils import vis
 
 def main():
     MODEL = "./weights/yolox_s.onnx"
-    SCORE_TH = 0.3
     INPUT_SHAPE = "640,640"
     WITH_P6 = False
 
     input_shape = tuple(map(int, INPUT_SHAPE.split(",")))
     session = onnxruntime.InferenceSession(MODEL)
 
-    def inference(gr_input):
-        # RGB2BGR?
+    def inference(gr_input, score_thr, nms_iou_thr):
         img, ratio = preprocess(gr_input, input_shape)
 
         ort_inputs = {session.get_inputs()[0].name: img[None, :, :, :]}
@@ -43,7 +32,7 @@ def main():
         boxes_xyxy[:, 2] = boxes[:, 0] + boxes[:, 2] / 2.0
         boxes_xyxy[:, 3] = boxes[:, 1] + boxes[:, 3] / 2.0
         boxes_xyxy /= ratio
-        dets = multiclass_nms(boxes_xyxy, scores, nms_thr=0.45, score_thr=0.1)
+        dets = multiclass_nms(boxes_xyxy, scores, nms_thr=nms_iou_thr, score_thr=0.01)
         if dets is not None:
             final_boxes, final_scores, final_cls_inds = (
                 dets[:, :4],
@@ -55,14 +44,37 @@ def main():
                 final_boxes,
                 final_scores,
                 final_cls_inds,
-                conf=SCORE_TH,
+                conf=score_thr,
                 class_names=COCO_CLASSES,
             )
 
         return np.asarray(gr_input)
 
-    inputs = gr.inputs.Image()
-    interface = gr.Interface(fn=inference, inputs=inputs, outputs="image")
+    img_input = gr.inputs.Image()
+    score_thr_input = gr.inputs.Slider(
+        minimum=0,
+        maximum=1.0,
+        step=0.05,
+        default=0.3,
+        label="score threshold",
+    )
+    nms_iou_thr_input = gr.inputs.Slider(
+        minimum=0,
+        maximum=1.0,
+        step=0.05,
+        default=0.45,
+        label="nms iou threshold",
+    )
+
+    interface = gr.Interface(
+        fn=inference,
+        inputs=[
+            img_input,
+            score_thr_input,
+            nms_iou_thr_input,
+        ],
+        outputs="image",
+    )
 
     interface.launch(server_name="0.0.0.0")
 

@@ -1,4 +1,3 @@
-import cv2
 import gradio as gr
 import numpy as np
 import onnxruntime
@@ -10,18 +9,23 @@ from yolox_utils import vis
 
 def main():
     MODEL = "./weights/yolox_s.onnx"
-    INPUT_SHAPE = "640,640"
+    INPUT_SHAPE = (640, 640)
     WITH_P6 = False
 
-    input_shape = tuple(map(int, INPUT_SHAPE.split(",")))
     session = onnxruntime.InferenceSession(MODEL)
 
-    def inference(gr_input, score_thr, nms_iou_thr):
-        img, ratio = preprocess(gr_input, input_shape)
+    def inference(
+        gr_input: np.ndarray, score_thr: float, nms_iou_thr: float
+    ) -> np.ndarray:
+        """Inference with onnx model
+        Reference:
+        https://github.com/Megvii-BaseDetection/YOLOX/blob/main/demo/ONNXRuntime/onnx_inference.py
+        """
+        img, ratio = preprocess(gr_input, INPUT_SHAPE)
 
         ort_inputs = {session.get_inputs()[0].name: img[None, :, :, :]}
         output = session.run(None, ort_inputs)
-        predictions = demo_postprocess(output[0], input_shape, p6=WITH_P6)[0]
+        predictions = demo_postprocess(output[0], INPUT_SHAPE, p6=WITH_P6)[0]
 
         boxes = predictions[:, :4]
         scores = predictions[:, 4:5] * predictions[:, 5:]

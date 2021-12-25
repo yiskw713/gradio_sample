@@ -46,3 +46,7 @@ python src/object_detection.py
 * [gradio-app/gradio: Create UIs for your machine learning model in Python in 3 minutes](https://github.com/gradio-app/gradio)
 * [torchvision.models — Torchvision 0.11.0 documentation](https://pytorch.org/vision/stable/models.html)
 * [Megvii-BaseDetection/YOLOX: YOLOX is a high-performance anchor-free YOLO, exceeding yolov3~v5 with MegEngine, ONNX, TensorRT, ncnn, and OpenVINO supported. Documentation: https://yolox.readthedocs.io/](https://github.com/Megvii-BaseDetection/YOLOX)
+* [【Gradio / PyTorch】Gradioで画像分類を行うデモアプリを簡単に作る](https://yiskw713.hatenablog.com/entry/gradio_image_classification)
+* [【Gradio / PyTorch】Gradioで画像の前処理を可視化するデモを作る](https://yiskw713.hatenablog.com/entry/gradio-preprocess-visualization)
+* [【Gradio / PyTorch】Gradioでセマンティックセグメンテーションを行うデモアプリを作る](https://yiskw713.hatenablog.com/entry/gradio-semantic-segmentation)
+* [【Gradio / PyTorch】YOLOXで物体検出を行うデモアプリを作る](https://yiskw713.hatenablog.com/entry/gradio-yolox-object-detection)
